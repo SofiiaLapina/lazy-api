@@ -2,15 +2,21 @@ from flask import Flask, jsonify
 import firebase_admin
 from firebase_admin import credentials, firestore
 import random
+import os
+import json
 
-# Firebase init
-print("🛠️ Ініціалізую Firebase...")
-cred = credentials.Certificate("firebase-key.json")
+# Отримуємо JSON-ключ із змінної середовища
+firebase_key = os.environ.get("FIREBASE_KEY_JSON")
+
+if not firebase_key:
+    raise Exception("❌ FIREBASE_KEY_JSON не знайдено!")
+
+# Ініціалізуємо Firebase з рядка JSON
+cred = credentials.Certificate(json.loads(firebase_key))
 firebase_admin.initialize_app(cred)
 db = firestore.client()
-print("✅ Firebase підключено!")
 
-# Flask init
+# Flask API
 app = Flask(__name__)
 
 @app.route("/random-excuse", methods=["GET"])
@@ -22,5 +28,5 @@ def random_excuse():
     return jsonify(random.choice(excuses))
 
 if __name__ == "__main__":
-    print("🚀 API запускається на http://localhost:5000 ...")
+    print("API запускається на http://localhost:5000 ...")
     app.run(debug=True)
