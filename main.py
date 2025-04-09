@@ -28,5 +28,7 @@ def random_excuse():
     return jsonify(random.choice(excuses))
 
 if __name__ == "__main__":
-    print("API запускається на http://localhost:5000 ...")
-    app.run(debug=True)
+    print("🚀 API запускається на Railway...")
+    # Для локального запуску: http://localhost:5000
+    # Для Railway — слухає на 0.0.0.0 з портом із оточення
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
