@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 import firebase_admin
 from firebase_admin import credentials, firestore
 import random
@@ -17,7 +17,11 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Flask API
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 @app.route("/random-excuse", methods=["GET"])
 def random_excuse():
@@ -29,6 +33,4 @@ def random_excuse():
 
 if __name__ == "__main__":
     print("🚀 API запускається на Railway...")
-    # Для локального запуску: http://localhost:5000
-    # Для Railway — слухає на 0.0.0.0 з портом із оточення
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
