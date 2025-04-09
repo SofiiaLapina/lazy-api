@@ -72,6 +72,53 @@
       0% { transform: scale(0.5); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
+
+    /* 👵 Бабуся */
+    #granny {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 2.5rem;
+      cursor: pointer;
+      z-index: 999;
+      transition: transform 0.2s;
+    }
+
+    #granny:hover {
+      transform: scale(1.2) rotate(-10deg);
+    }
+
+    #granny-tip {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffdcdc;
+      padding: 1rem 2rem;
+      border: 2px solid #ff6b6b;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #2f2f2f;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.5s ease;
+    }
+
+    #granny-tip.show {
+      top: 20px;
+      opacity: 1;
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(-50%) translateY(0); }
+      25% { transform: translateX(-50%) translateY(-5px); }
+      50% { transform: translateX(-50%) translateY(5px); }
+      75% { transform: translateX(-50%) translateY(-5px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -83,12 +130,30 @@
     🐌 Зроблено з любов’ю, мемами і неймовірною лінню.
   </div>
 
+  <!-- Бабуся в кутку -->
+  <div id="granny" title="👵 Натисни для суворої поради">👵</div>
+  <div id="granny-tip">👵 При Сталіні так не лінувалися.</div>
+
   <audio id="pop-sound" src="https://www.myinstants.com/media/sounds/pop-cat-original-meme.mp3" preload="auto"></audio>
 
   <script>
     const emojis = ['😴', '🤡', '😵', '😌', '🙃', '😎', '😅', '🫠', '🧠', '💤'];
+    const grannyTips = [
+      "👵 При Сталіні так не лінувалися.",
+      "👵 В мої роки вже по два діти було, а не кнопки тискали.",
+      "👵 Сидиш тут... А картоплю хто копати буде?",
+      "👵 Ще одна відмазка — і я кличу діда.",
+      "👵 Хоч щось за день зроби — щоб не соромно було в труні лежати.",
+      "👵 Навіть мій кактус більше рухається, ніж ти.",
+      "👵 Ото виросло покоління кнопкодавів.",
+      "👵 Боже… яке кончене.",
+      "👵 От сидиш ти тут, а Господь дивиться і плаче."
+    ];
+
     const excuseEl = document.getElementById("excuse");
     const popSound = document.getElementById("pop-sound");
+    const granny = document.getElementById("granny");
+    const tip = document.getElementById("granny-tip");
 
     async function getExcuse() {
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -102,6 +167,13 @@
         excuseEl.innerHTML = "❌ Не вдалося завантажити відмазку.";
       }
     }
+
+    granny.addEventListener("click", () => {
+      const random = grannyTips[Math.floor(Math.random() * grannyTips.length)];
+      tip.innerText = random;
+      tip.classList.add("show");
+      setTimeout(() => tip.classList.remove("show"), 4000);
+    });
   </script>
 </body>
 </html>
