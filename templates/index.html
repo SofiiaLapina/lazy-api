@@ -5,16 +5,18 @@
   <title>🛋️ Лінивий генератор відмазок</title>
   <style>
     body {
-      background-color: #fff5e6;
+      background: linear-gradient(to right, #fff5e6, #ffe6f0);
       font-family: 'Comic Sans MS', cursive, sans-serif;
       text-align: center;
       padding: 3rem;
+      overflow-x: hidden;
     }
 
     h1 {
       font-size: 3rem;
       color: #d35400;
       margin-bottom: 1rem;
+      animation: pop-in 1s ease-out;
     }
 
     button {
@@ -40,6 +42,7 @@
       font-size: 2rem;
       color: #2f3542;
       min-height: 100px;
+      animation: fade-in 0.5s ease-in-out;
     }
 
     .emoji {
@@ -48,25 +51,52 @@
       display: inline-block;
     }
 
+    .footer {
+      margin-top: 3rem;
+      font-size: 1rem;
+      color: #999;
+    }
+
     @keyframes wiggle {
       0%, 100% { transform: rotate(0deg); }
       25% { transform: rotate(3deg); }
       75% { transform: rotate(-3deg); }
     }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pop-in {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
-  <h1>🛋️ Чому я нічого не зробила?</h1>
-  <button onclick="getExcuse()">Дай відмазку 😎</button>
+  <h1>🛋️ Чому я нічого не зробив(-ла)?</h1>
+  <button onclick="getExcuse()">🎲 Дай мені відмазку</button>
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
 
+  <div class="footer">
+    Зробив(-ла) цей шедевр ти. І я. І трохи лінь 😁
+  </div>
+
+  <audio id="pop-sound" src="https://www.myinstants.com/media/sounds/pop-cat-original-meme.mp3" preload="auto"></audio>
+
   <script>
+    const emojis = ['😴', '🤡', '😵', '😌', '🙃', '😎', '😅', '🫠', '🧠', '💤'];
+    const excuseEl = document.getElementById("excuse");
+    const popSound = document.getElementById("pop-sound");
+
     async function getExcuse() {
-      const excuseEl = document.getElementById("excuse");
-      excuseEl.innerHTML = "<span class='emoji'>🤔</span> Завантажуємо...";
+      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+      excuseEl.innerHTML = `<span class='emoji'>${randomEmoji}</span> Завантажуємо...`;
       try {
         const res = await fetch("https://lazy-api-production.up.railway.app/random-excuse");
         const data = await res.json();
+        popSound.play();
         excuseEl.innerHTML = "🗯️ " + data.text;
       } catch (err) {
         excuseEl.innerHTML = "❌ Не вдалося завантажити відмазку.";
