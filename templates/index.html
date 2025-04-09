@@ -159,7 +159,7 @@
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
       excuseEl.innerHTML = `<span class='emoji'>${randomEmoji}</span> Завантажуємо...`;
       try {
-        const res = await fetch("https://lazy-api-production.up.railway.app/random-excuse");
+        const res = await fetch("/random-excuse");
         const data = await res.json();
         popSound.play();
         excuseEl.innerHTML = "🗯️ " + data.text;
