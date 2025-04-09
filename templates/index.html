@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>🛋️ Лінивий генератор відмазок</title>
+  <style>
+    body {
+      background-color: #fff5e6;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: #d35400;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      background-color: #ff6b81;
+      color: #fff;
+      border: none;
+      border-radius: 15px;
+      padding: 1.2rem 2rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: transform 0.1s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background-color: #ff4757;
+    }
+
+    .excuse {
+      margin-top: 3rem;
+      font-size: 2rem;
+      color: #2f3542;
+      min-height: 100px;
+    }
+
+    .emoji {
+      font-size: 4rem;
+      animation: wiggle 1.2s infinite;
+      display: inline-block;
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(3deg); }
+      75% { transform: rotate(-3deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🛋️ Чому я нічого не зробила?</h1>
+  <button onclick="getExcuse()">Дай відмазку 😎</button>
+  <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
+
+  <script>
+    async function getExcuse() {
+      const excuseEl = document.getElementById("excuse");
+      excuseEl.innerHTML = "<span class='emoji'>🤔</span> Завантажуємо...";
+      try {
+        const res = await fetch("https://lazy-api-production.up.railway.app/random-excuse");
+        const data = await res.json();
+        excuseEl.innerHTML = "🗯️ " + data.text;
+      } catch (err) {
+        excuseEl.innerHTML = "❌ Не вдалося завантажити відмазку.";
+      }
+    }
+  </script>
+</body>
+</html>
