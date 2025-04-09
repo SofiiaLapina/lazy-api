@@ -73,7 +73,6 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-    /* 👵 Бабуся */
     #granny {
       position: fixed;
       bottom: 20px;
@@ -130,11 +129,13 @@
     🐌 Зроблено з любов’ю, мемами і неймовірною лінню.
   </div>
 
-  <!-- Бабуся в кутку -->
+  <!-- Бабуся -->
   <div id="granny" title="👵 Натисни для суворої поради">👵</div>
   <div id="granny-tip">👵 При Сталіні так не лінувалися.</div>
 
+  <!-- Звуки -->
   <audio id="pop-sound" src="https://www.myinstants.com/media/sounds/pop-cat-original-meme.mp3" preload="auto"></audio>
+  <audio id="granny-voice" src="https://www.soundjay.com/human/cough-01.mp3" preload="auto"></audio>
 
   <script>
     const emojis = ['😴', '🤡', '😵', '😌', '🙃', '😎', '😅', '🫠', '🧠', '💤'];
@@ -154,6 +155,7 @@
     const popSound = document.getElementById("pop-sound");
     const granny = document.getElementById("granny");
     const tip = document.getElementById("granny-tip");
+    const grannyVoice = document.getElementById("granny-voice");
 
     async function getExcuse() {
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -172,6 +174,7 @@
       const random = grannyTips[Math.floor(Math.random() * grannyTips.length)];
       tip.innerText = random;
       tip.classList.add("show");
+      grannyVoice.play(); // 🔈 бабуся бурчить
       setTimeout(() => tip.classList.remove("show"), 4000);
     });
   </script>
