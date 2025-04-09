@@ -6,7 +6,7 @@ import os
 import json
 from datetime import datetime
 
-# 🔁 Автоматичне визначення: локальний запуск чи Railway
+# Автоматичне визначення: локальний запуск чи Railway
 if os.environ.get("RAILWAY_ENVIRONMENT"):
     print("🌩️ Режим: Railway (production)")
     firebase_key = os.environ.get("FIREBASE_KEY_JSON")
@@ -45,6 +45,16 @@ def random_excuse():
         f.write(log_entry)
 
     return jsonify(chosen)
+
+# маршрут для перегляду логів
+@app.route("/logs", methods=["GET"])
+def show_logs():
+    try:
+        with open("excuse-log.txt", "r", encoding="utf-8") as f:
+            content = f.read()
+        return f"<pre>{content}</pre>"
+    except FileNotFoundError:
+        return "Файл логів не знайдено. Ще не було запитів або файл не створено."
 
 if __name__ == "__main__":
     print("🚀 API запускається локально...")
