@@ -4,20 +4,26 @@ from firebase_admin import credentials, firestore
 import random
 import os
 import json
-from datetime import datetime  # ✅ додаємо дату
+from datetime import datetime
 
-# Отримуємо JSON-ключ із змінної середовища
-firebase_key = os.environ.get("FIREBASE_KEY_JSON")
+# 🔁 Автоматичне визначення: локальний запуск чи Railway
+if os.environ.get("RAILWAY_ENVIRONMENT"):
+    print("🌩️ Режим: Railway (production)")
+    firebase_key = os.environ.get("FIREBASE_KEY_JSON")
+    if not firebase_key:
+        raise Exception("❌ FIREBASE_KEY_JSON не знайдено в оточенні!")
+    cred = credentials.Certificate(json.loads(firebase_key))
+else:
+    print("💻 Режим: локальний")
+    with open("firebase-key.json") as f:
+        firebase_key = json.load(f)
+    cred = credentials.Certificate(firebase_key)
 
-if not firebase_key:
-    raise Exception("❌ FIREBASE_KEY_JSON не знайдено!")
-
-# Ініціалізуємо Firebase з рядка JSON
-cred = credentials.Certificate(json.loads(firebase_key))
+# Firebase
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# Flask API
+# Flask
 app = Flask(__name__, template_folder="templates")
 
 @app.route("/")
@@ -35,12 +41,11 @@ def random_excuse():
     client_ip = request.remote_addr or "unknown"
     log_entry = f"{datetime.now()} | {client_ip} | {chosen['text']}\n"
 
-    # ✅ запис у лог-файл
     with open("excuse-log.txt", "a", encoding="utf-8") as f:
         f.write(log_entry)
 
     return jsonify(chosen)
 
 if __name__ == "__main__":
-    print("🚀 API запускається на Railway...")
+    print("🚀 API запускається локально...")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
