@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 import firebase_admin
 from firebase_admin import credentials, firestore
 import random
 import os
 import json
+from datetime import datetime  # ✅ додаємо дату
 
 # Отримуємо JSON-ключ із змінної середовища
 firebase_key = os.environ.get("FIREBASE_KEY_JSON")
@@ -29,7 +30,16 @@ def random_excuse():
     excuses = [doc.to_dict() for doc in excuses_ref]
     if not excuses:
         return jsonify({"error": "Немає відмазок 😢"}), 404
-    return jsonify(random.choice(excuses))
+
+    chosen = random.choice(excuses)
+    client_ip = request.remote_addr or "unknown"
+    log_entry = f"{datetime.now()} | {client_ip} | {chosen['text']}\n"
+
+    # ✅ запис у лог-файл
+    with open("excuse-log.txt", "a", encoding="utf-8") as f:
+        f.write(log_entry)
+
+    return jsonify(chosen)
 
 if __name__ == "__main__":
     print("🚀 API запускається на Railway...")
