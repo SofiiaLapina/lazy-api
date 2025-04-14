@@ -1,0 +1,28 @@
+name: GitHub FaaS — Random Excuse
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
+jobs:
+  run-function:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout репозиторій
+        uses: actions/checkout@v3
+
+      - name: Встановити Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Встановити залежності
+        run: |
+          python -m pip install --upgrade pip
+          pip install firebase-admin
+
+      - name: Запуск функції
+        env:
+          FIREBASE_KEY_JSON: ${{ secrets.FIREBASE_KEY_JSON }}
+        run: python .github/workflows/function.py
