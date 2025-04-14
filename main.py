@@ -5,6 +5,7 @@ import random
 import os
 import json
 from datetime import datetime
+import requests
 
 # Автоматичне визначення: локальний запуск чи Railway
 if os.environ.get("RAILWAY_ENVIRONMENT"):
@@ -35,18 +36,28 @@ def random_excuse():
     excuses_ref = db.collection("excuses").stream()
     excuses = [doc.to_dict() for doc in excuses_ref]
     if not excuses:
-        return jsonify({"error": "Немає відмазок 😢"}), 404
+        return jsonify({"error": "Немає відмазок 😭"}), 404
 
     chosen = random.choice(excuses)
     client_ip = request.remote_addr or "unknown"
     log_entry = f"{datetime.now()} | {client_ip} | {chosen['text']}\n"
 
+    # Локальний запис у файл
     with open("excuse-log.txt", "a", encoding="utf-8") as f:
         f.write(log_entry)
 
+    # Відправка на EC2
+    try:
+        requests.post("http://54.163.84.41:5000/log", json={
+            "ip": client_ip,
+            "text": chosen["text"]
+        })
+    except Exception as e:
+        print("\u26a0\ufe0f Помилка надсилання логу на EC2:", e)
+
     return jsonify(chosen)
 
-# маршрут для перегляду логів
+# Маршрут для перегляду логів
 @app.route("/logs", methods=["GET"])
 def show_logs():
     try:
