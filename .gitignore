@@ -1,1 +1,10 @@
 firebase-key.json
+
+.DS_Store
+
+
+*.log
+excuse-log.txt
+
+__pycache__/
+*.pyc
