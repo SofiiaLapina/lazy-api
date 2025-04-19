@@ -132,7 +132,7 @@
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
 
   <img id="meme" class="meme" style="display:none;" />
-  <video id="granny-video" class="meme" style="display:none;" muted></video>
+  <video id="granny-video" class="meme" style="display:none;" muted autoplay playsinline></video>
 
   <div class="footer">
     🐌 Зроблено з любов’ю і неймовірною лінню.
@@ -191,17 +191,12 @@
       tip.classList.add("show");
 
       if (random === "👵 Боже… яке кончене.") {
-        grannyVideo.src = "/static/granny/granny.mp4";
+        grannyVideo.src = "/static/granny/bozhe.mp4";
         grannyVideo.style.display = "block";
         memeImg.style.display = "none";
         grannyVideo.play();
       } else {
-        const gifs = [
-          "/static/granny/1.gif",
-          "/static/granny/2.gif",
-          "/static/granny/angry.gif",
-          "/static/granny/3.gif"
-        ];
+        const gifs = Array.from({ length: 9 }, (_, i) => `/static/granny/${i + 1}.gif`);
         const gif = gifs[Math.floor(Math.random() * gifs.length)];
         memeImg.src = gif;
         memeImg.style.display = "block";
