@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 import requests
 
-# Автоматичне визначення: локальний запуск чи Railway
+# 🔐 Ініціалізація Firebase залежно від середовища
 if os.environ.get("RAILWAY_ENVIRONMENT"):
     print("🌩️ Режим: Railway (production)")
     firebase_key = os.environ.get("FIREBASE_KEY_JSON")
@@ -20,11 +20,10 @@ else:
         firebase_key = json.load(f)
     cred = credentials.Certificate(firebase_key)
 
-# Firebase
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# Flask
+# 🔧 Налаштування Flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 @app.route("/")
@@ -33,7 +32,7 @@ def home():
 
 @app.route("/random-excuse", methods=["GET"])
 def random_excuse():
-    # Отримання відмазок з Firestore
+    # 📥 Отримання відмазок з Firestore
     excuses_ref = db.collection("excuses").get()
     excuses = [doc.to_dict() for doc in excuses_ref]
     if not excuses:
@@ -43,11 +42,11 @@ def random_excuse():
     client_ip = request.remote_addr or "unknown"
     log_entry = f"{datetime.now()} | {client_ip} | {chosen['text']}\n"
 
-    # Локальний лог
+    # 📝 Запис у локальний лог-файл
     with open("excuse-log.txt", "a", encoding="utf-8") as f:
         f.write(log_entry)
 
-    # Надсилання логів на EC2
+    # ☁️ Відправка логу на EC2 (IaaS)
     try:
         requests.post("http://54.163.84.41:5000/log", json={
             "ip": client_ip,
@@ -56,7 +55,7 @@ def random_excuse():
     except Exception as e:
         print("⚠️ Помилка надсилання логу на EC2:", e)
 
-    # 🔁 Рандомна гіфка з static/memes/*.gif
+    # 🖼️ Рандомна гіфка з папки static/memes
     meme_url = ""
     memes_dir = os.path.join(app.static_folder, "memes")
     if os.path.exists(memes_dir):
@@ -79,6 +78,7 @@ def show_logs():
     except FileNotFoundError:
         return "Файл логів не знайдено. Ще не було запитів або файл не створено."
 
+# 🚀 Запуск
 if __name__ == "__main__":
     print("🚀 API запускається локально...")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

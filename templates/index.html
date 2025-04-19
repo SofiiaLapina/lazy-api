@@ -45,11 +45,10 @@
       animation: fade-in 0.5s ease-in-out;
     }
 
-    .meme {
+    .meme, #granny-video {
       display: block;
-      margin: 2rem auto 0;
-      max-width: 100%;
-      height: auto;
+      margin: 2rem auto;
+      max-width: 80%;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
@@ -133,7 +132,10 @@
   <h1>🛋️ Чому я нічого не зробив(-ла)?</h1>
   <button onclick="getExcuse()">🎲 Дай мені відмазку</button>
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
+  
+  <!-- Вивід гіфки або відео -->
   <img id="meme" class="meme" style="display:none;" />
+  <video id="granny-video" class="meme" style="display:none;" muted></video>
 
   <div class="footer">
     🐌 Зроблено з любов’ю і неймовірною лінню.
@@ -163,11 +165,13 @@
     const granny = document.getElementById("granny");
     const tip = document.getElementById("granny-tip");
     const memeImg = document.getElementById("meme");
+    const grannyVideo = document.getElementById("granny-video");
 
     async function getExcuse() {
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
       excuseEl.innerHTML = `<span class='emoji'>${randomEmoji}</span> Завантажуємо...`;
       memeImg.style.display = "none";
+      grannyVideo.style.display = "none";
 
       try {
         const res = await fetch("/random-excuse");
@@ -181,7 +185,6 @@
         }
       } catch (err) {
         excuseEl.innerHTML = "❌ Не вдалося завантажити відмазку.";
-        memeImg.style.display = "none";
       }
     }
 
@@ -189,7 +192,33 @@
       const random = grannyTips[Math.floor(Math.random() * grannyTips.length)];
       tip.innerText = random;
       tip.classList.add("show");
-      setTimeout(() => tip.classList.remove("show"), 4000);
+
+      // показати відео тільки на фразу
+      if (random === "👵 Боже… яке кончене.") {
+        memeImg.style.display = "none";
+        grannyVideo.src = "/static/granny/granny.mp4";
+        grannyVideo.style.display = "block";
+        grannyVideo.play();
+      } else {
+        const gifs = [
+          "/static/granny/1.gif",
+          "/static/granny/2.gif",
+          "/static/granny/angry.gif",
+          "/static/granny/3.gif"
+        ];
+        const gif = gifs[Math.floor(Math.random() * gifs.length)];
+        grannyVideo.pause();
+        grannyVideo.style.display = "none";
+        memeImg.src = gif;
+        memeImg.style.display = "block";
+      }
+
+      setTimeout(() => {
+        tip.classList.remove("show");
+        grannyVideo.pause();
+        grannyVideo.style.display = "none";
+        memeImg.style.display = "none";
+      }, 6000);
     });
   </script>
 </body>
