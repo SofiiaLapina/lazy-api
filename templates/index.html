@@ -195,6 +195,13 @@
         grannyVideo.style.display = "block";
         memeImg.style.display = "none";
         grannyVideo.play();
+
+        // Сховати текст після завершення відео
+        grannyVideo.onended = () => {
+          tip.classList.remove("show");
+          grannyVideo.style.display = "none";
+        };
+
       } else {
         const gifs = Array.from({ length: 9 }, (_, i) => `/static/granny/${i + 1}.gif`);
         const gif = gifs[Math.floor(Math.random() * gifs.length)];
@@ -202,14 +209,13 @@
         memeImg.style.display = "block";
         grannyVideo.pause();
         grannyVideo.style.display = "none";
-      }
 
-      setTimeout(() => {
-        tip.classList.remove("show");
-        grannyVideo.pause();
-        grannyVideo.style.display = "none";
-        memeImg.style.display = "none";
-      }, 6000);
+        // Автоховання гіфки через 10 сек
+        setTimeout(() => {
+          tip.classList.remove("show");
+          memeImg.style.display = "none";
+        }, 10000);
+      }
     });
   </script>
 </body>
