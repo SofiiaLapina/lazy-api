@@ -132,7 +132,7 @@
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
 
   <img id="meme" class="meme" style="display:none;" />
-  <video id="granny-video" class="meme" style="display:none;" muted autoplay playsinline></video>
+  <video id="granny-video" class="meme" style="display:none;" autoplay playsinline controls></video>
 
   <div class="footer">
     🐌 Зроблено з любов’ю і неймовірною лінню.
@@ -196,7 +196,6 @@
         memeImg.style.display = "none";
         grannyVideo.play();
 
-        // Сховати текст після завершення відео
         grannyVideo.onended = () => {
           tip.classList.remove("show");
           grannyVideo.style.display = "none";
@@ -210,7 +209,6 @@
         grannyVideo.pause();
         grannyVideo.style.display = "none";
 
-        // Автоховання гіфки через 10 сек
         setTimeout(() => {
           tip.classList.remove("show");
           memeImg.style.display = "none";
