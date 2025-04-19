@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 import requests
 
-# 🔐 Ініціалізація Firebase залежно від середовища
+# 🔐 Ініціалізація Firebase
 if os.environ.get("RAILWAY_ENVIRONMENT"):
     print("🌩️ Режим: Railway (production)")
     firebase_key = os.environ.get("FIREBASE_KEY_JSON")
@@ -23,69 +23,61 @@ else:
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# 🔧 Налаштування Flask
+# 🔧 Flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
-# 🌐 Головна сторінка
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# 🎲 API: віддати випадкову відмазку та мем
 @app.route("/random-excuse", methods=["GET"])
 def random_excuse():
-    # 📥 Витяг з Firestore
-    docs = db.collection("excuses").get()
-    excuses = [doc.to_dict() for doc in docs]
-
+    # 📥 Відмазки
+    excuses_ref = db.collection("excuses").get()
+    excuses = [doc.to_dict() for doc in excuses_ref]
     if not excuses:
         return jsonify({"error": "Немає відмазок 😭"}), 404
 
     chosen = random.choice(excuses)
-    excuse_text = chosen.get("text", "Без відмазки 🥲")
-
-    # 🧾 Логування
     client_ip = request.remote_addr or "unknown"
-    log_entry = f"{datetime.now()} | {client_ip} | {excuse_text}\n"
+    log_entry = f"{datetime.now()} | {client_ip} | {chosen['text']}\n"
 
-    try:
-        with open("excuse-log.txt", "a", encoding="utf-8") as f:
-            f.write(log_entry)
-    except Exception as e:
-        print("⚠️ Локальний лог не записано:", e)
+    # 📝 Логи
+    with open("excuse-log.txt", "a", encoding="utf-8") as f:
+        f.write(log_entry)
 
     try:
         requests.post("http://54.163.84.41:5000/log", json={
             "ip": client_ip,
-            "text": excuse_text
+            "text": chosen["text"]
         })
     except Exception as e:
-        print("⚠️ EC2 лог не надіслано:", e)
+        print("⚠️ EC2 лог помилка:", e)
 
-    # 🖼️ Гіфка
+    # 🖼️ Рандомна гіфка, але НЕ для фрази з бабусею
     meme_url = ""
-    memes_dir = os.path.join(app.static_folder, "memes")
-    if os.path.exists(memes_dir):
-        gif_files = [f for f in os.listdir(memes_dir) if f.endswith(".gif")]
-        if gif_files:
-            selected_gif = random.choice(gif_files)
-            meme_url = f"/static/memes/{selected_gif}"
+    if "боже" not in chosen["text"].lower():
+        memes_dir = os.path.join(app.static_folder, "memes")
+        if os.path.exists(memes_dir):
+            gif_files = [f for f in os.listdir(memes_dir) if f.endswith(".gif")]
+            if gif_files:
+                selected = random.choice(gif_files)
+                meme_url = f"/static/memes/{selected}"
 
     return jsonify({
-        "text": excuse_text,
+        "text": chosen["text"],
         "meme_url": meme_url
     })
 
-# 📄 Вивід логів
 @app.route("/logs", methods=["GET"])
 def show_logs():
     try:
         with open("excuse-log.txt", "r", encoding="utf-8") as f:
             return f"<pre>{f.read()}</pre>"
     except FileNotFoundError:
-        return "Файл логів не знайдено 🫤"
+        return "Файл логів не знайдено."
 
-# 🚀 Запуск локально
+# 🚀 Запуск
 if __name__ == "__main__":
     print("🚀 API запускається локально...")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
