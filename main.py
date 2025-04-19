@@ -26,59 +26,66 @@ db = firestore.client()
 # 🔧 Налаштування Flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
+# 🌐 Головна сторінка
 @app.route("/")
 def home():
     return render_template("index.html")
 
+# 🎲 API: віддати випадкову відмазку та мем
 @app.route("/random-excuse", methods=["GET"])
 def random_excuse():
-    # 📥 Отримання відмазок з Firestore
-    excuses_ref = db.collection("excuses").get()
-    excuses = [doc.to_dict() for doc in excuses_ref]
+    # 📥 Витяг з Firestore
+    docs = db.collection("excuses").get()
+    excuses = [doc.to_dict() for doc in docs]
+
     if not excuses:
         return jsonify({"error": "Немає відмазок 😭"}), 404
 
     chosen = random.choice(excuses)
+    excuse_text = chosen.get("text", "Без відмазки 🥲")
+
+    # 🧾 Логування
     client_ip = request.remote_addr or "unknown"
-    log_entry = f"{datetime.now()} | {client_ip} | {chosen['text']}\n"
+    log_entry = f"{datetime.now()} | {client_ip} | {excuse_text}\n"
 
-    # 📝 Запис у локальний лог-файл
-    with open("excuse-log.txt", "a", encoding="utf-8") as f:
-        f.write(log_entry)
+    try:
+        with open("excuse-log.txt", "a", encoding="utf-8") as f:
+            f.write(log_entry)
+    except Exception as e:
+        print("⚠️ Локальний лог не записано:", e)
 
-    # ☁️ Відправка логу на EC2 (IaaS)
     try:
         requests.post("http://54.163.84.41:5000/log", json={
             "ip": client_ip,
-            "text": chosen["text"]
+            "text": excuse_text
         })
     except Exception as e:
-        print("⚠️ Помилка надсилання логу на EC2:", e)
+        print("⚠️ EC2 лог не надіслано:", e)
 
-    # 🖼️ Рандомна гіфка з папки static/memes
+    # 🖼️ Гіфка
     meme_url = ""
     memes_dir = os.path.join(app.static_folder, "memes")
     if os.path.exists(memes_dir):
         gif_files = [f for f in os.listdir(memes_dir) if f.endswith(".gif")]
         if gif_files:
-            selected = random.choice(gif_files)
-            meme_url = f"/static/memes/{selected}"
+            selected_gif = random.choice(gif_files)
+            meme_url = f"/static/memes/{selected_gif}"
 
     return jsonify({
-        "text": chosen["text"],
+        "text": excuse_text,
         "meme_url": meme_url
     })
 
+# 📄 Вивід логів
 @app.route("/logs", methods=["GET"])
 def show_logs():
     try:
         with open("excuse-log.txt", "r", encoding="utf-8") as f:
-            content = f.read()
-        return f"<pre>{content}</pre>"
+            return f"<pre>{f.read()}</pre>"
     except FileNotFoundError:
-        return "Файл логів не знайдено. Ще не було запитів або файл не створено."
+        return "Файл логів не знайдено 🫤"
 
-# 🚀 Запуск
+# 🚀 Запуск локально
 if __name__ == "__main__":
     print("🚀 API запускається локально...")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

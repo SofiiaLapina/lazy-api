@@ -9,7 +9,6 @@
       font-family: 'Comic Sans MS', cursive, sans-serif;
       text-align: center;
       padding: 3rem;
-      overflow-x: hidden;
     }
 
     h1 {
@@ -56,7 +55,6 @@
     .emoji {
       font-size: 4rem;
       animation: wiggle 1.2s infinite;
-      display: inline-block;
     }
 
     .footer {
@@ -132,8 +130,7 @@
   <h1>🛋️ Чому я нічого не зробив(-ла)?</h1>
   <button onclick="getExcuse()">🎲 Дай мені відмазку</button>
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
-  
-  <!-- Вивід гіфки або відео -->
+
   <img id="meme" class="meme" style="display:none;" />
   <video id="granny-video" class="meme" style="display:none;" muted></video>
 
@@ -161,11 +158,11 @@
     ];
 
     const excuseEl = document.getElementById("excuse");
-    const popSound = document.getElementById("pop-sound");
-    const granny = document.getElementById("granny");
-    const tip = document.getElementById("granny-tip");
     const memeImg = document.getElementById("meme");
     const grannyVideo = document.getElementById("granny-video");
+    const tip = document.getElementById("granny-tip");
+    const granny = document.getElementById("granny");
+    const popSound = document.getElementById("pop-sound");
 
     async function getExcuse() {
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -193,11 +190,10 @@
       tip.innerText = random;
       tip.classList.add("show");
 
-      // показати відео тільки на фразу
       if (random === "👵 Боже… яке кончене.") {
-        memeImg.style.display = "none";
         grannyVideo.src = "/static/granny/granny.mp4";
         grannyVideo.style.display = "block";
+        memeImg.style.display = "none";
         grannyVideo.play();
       } else {
         const gifs = [
@@ -207,10 +203,10 @@
           "/static/granny/3.gif"
         ];
         const gif = gifs[Math.floor(Math.random() * gifs.length)];
-        grannyVideo.pause();
-        grannyVideo.style.display = "none";
         memeImg.src = gif;
         memeImg.style.display = "block";
+        grannyVideo.pause();
+        grannyVideo.style.display = "none";
       }
 
       setTimeout(() => {
