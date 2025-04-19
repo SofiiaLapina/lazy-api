@@ -25,7 +25,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Flask
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__, template_folder="templates", static_folder="static")
 
 @app.route("/")
 def home():
@@ -33,7 +33,8 @@ def home():
 
 @app.route("/random-excuse", methods=["GET"])
 def random_excuse():
-    excuses_ref = db.collection("excuses").stream()
+    # Отримання відмазок з Firestore
+    excuses_ref = db.collection("excuses").get()
     excuses = [doc.to_dict() for doc in excuses_ref]
     if not excuses:
         return jsonify({"error": "Немає відмазок 😭"}), 404
@@ -42,22 +43,35 @@ def random_excuse():
     client_ip = request.remote_addr or "unknown"
     log_entry = f"{datetime.now()} | {client_ip} | {chosen['text']}\n"
 
-    # Локальний запис у файл
+    # Локальний лог
     with open("excuse-log.txt", "a", encoding="utf-8") as f:
         f.write(log_entry)
 
-    # Відправка на EC2
+    # Надсилання логів на EC2
     try:
         requests.post("http://54.163.84.41:5000/log", json={
             "ip": client_ip,
             "text": chosen["text"]
         })
     except Exception as e:
-        print("\u26a0\ufe0f Помилка надсилання логу на EC2:", e)
+        print("⚠️ Помилка надсилання логу на EC2:", e)
 
-    return jsonify(chosen)
+    # Рандомна гіфка з папки static/memes
+    memes_dir = os.path.join(app.static_folder, "memes")
+    if os.path.exists(memes_dir):
+        meme_files = os.listdir(memes_dir)
+        if meme_files:
+            meme_url = f"/static/memes/{random.choice(meme_files)}"
+        else:
+            meme_url = ""
+    else:
+        meme_url = ""
 
-# Маршрут для перегляду логів
+    return jsonify({
+        "text": chosen["text"],
+        "meme_url": meme_url
+    })
+
 @app.route("/logs", methods=["GET"])
 def show_logs():
     try:

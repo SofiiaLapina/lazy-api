@@ -45,6 +45,13 @@
       animation: fade-in 0.5s ease-in-out;
     }
 
+    .meme {
+      margin-top: 1.5rem;
+      max-width: 80%;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
     .emoji {
       font-size: 4rem;
       animation: wiggle 1.2s infinite;
@@ -124,16 +131,15 @@
   <h1>🛋️ Чому я нічого не зробив(-ла)?</h1>
   <button onclick="getExcuse()">🎲 Дай мені відмазку</button>
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
+  <img id="meme" class="meme" style="display:none;" />
 
   <div class="footer">
     🐌 Зроблено з любов’ю і неймовірною лінню.
   </div>
 
-  <!-- Бабуся -->
   <div id="granny" title="👵 Натисни для суворої поради">👵</div>
   <div id="granny-tip">👵 При Сталіні так не лінувалися.</div>
 
-  <!-- Звук кнопки -->
   <audio id="pop-sound" src="https://www.myinstants.com/media/sounds/pop-cat-original-meme.mp3" preload="auto"></audio>
 
   <script>
@@ -154,17 +160,26 @@
     const popSound = document.getElementById("pop-sound");
     const granny = document.getElementById("granny");
     const tip = document.getElementById("granny-tip");
+    const memeImg = document.getElementById("meme");
 
     async function getExcuse() {
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
       excuseEl.innerHTML = `<span class='emoji'>${randomEmoji}</span> Завантажуємо...`;
+      memeImg.style.display = "none";
+
       try {
         const res = await fetch("/random-excuse");
         const data = await res.json();
         popSound.play();
         excuseEl.innerHTML = "🗯️ " + data.text;
+
+        if (data.meme_url) {
+          memeImg.src = data.meme_url;
+          memeImg.style.display = "block";
+        }
       } catch (err) {
         excuseEl.innerHTML = "❌ Не вдалося завантажити відмазку.";
+        memeImg.style.display = "none";
       }
     }
 
