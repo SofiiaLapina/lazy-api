@@ -56,16 +56,14 @@ def random_excuse():
     except Exception as e:
         print("⚠️ Помилка надсилання логу на EC2:", e)
 
-    # Рандомна гіфка з папки static/memes
+    # 🔁 Рандомна гіфка з static/memes/*.gif
+    meme_url = ""
     memes_dir = os.path.join(app.static_folder, "memes")
     if os.path.exists(memes_dir):
-        meme_files = os.listdir(memes_dir)
-        if meme_files:
-            meme_url = f"/static/memes/{random.choice(meme_files)}"
-        else:
-            meme_url = ""
-    else:
-        meme_url = ""
+        gif_files = [f for f in os.listdir(memes_dir) if f.endswith(".gif")]
+        if gif_files:
+            selected = random.choice(gif_files)
+            meme_url = f"/static/memes/{selected}"
 
     return jsonify({
         "text": chosen["text"],
