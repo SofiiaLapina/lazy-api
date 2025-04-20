@@ -194,13 +194,13 @@
         grannyVideo.src = "/static/granny/bozhe.mp4";
         grannyVideo.style.display = "block";
         memeImg.style.display = "none";
+        grannyVideo.muted = false;
         grannyVideo.play();
 
         grannyVideo.onended = () => {
           tip.classList.remove("show");
           grannyVideo.style.display = "none";
         };
-
       } else {
         const gifs = Array.from({ length: 9 }, (_, i) => `/static/granny/${i + 1}.gif`);
         const gif = gifs[Math.floor(Math.random() * gifs.length)];
@@ -212,7 +212,7 @@
         setTimeout(() => {
           tip.classList.remove("show");
           memeImg.style.display = "none";
-        }, 10000);
+        }, 15000);
       }
     });
   </script>
