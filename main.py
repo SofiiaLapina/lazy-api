@@ -32,7 +32,8 @@ def home():
 
 @app.route("/random-excuse", methods=["GET"])
 def random_excuse():
-    """🎲 Отримати рандомну відмазку та оновити її рейтинг"""
+    """🌹 Отримати рандомну відмазку та оновити її рейтинг
+    """
     excuses_ref = db.collection("excuses").get()
     excuses = [doc for doc in excuses_ref]
     if not excuses:
@@ -41,7 +42,7 @@ def random_excuse():
     chosen_doc = random.choice(excuses)
     chosen_data = chosen_doc.to_dict()
 
-    # 📈 Збільшити рейтинг вибраної відмазки
+    # 📈 Збільшити рейтинг обраної відмазки
     try:
         chosen_doc.reference.update({
             "rating": firestore.Increment(1)
@@ -64,7 +65,7 @@ def random_excuse():
     except Exception as e:
         print("⚠️ EC2 лог помилка:", e)
 
-    # 🎞️ Підбір гіфки, якщо текст не містить "боже"
+    # 🎮 Підбір гіфки, якщо текст не містить "боже"
     meme_url = ""
     if "боже" not in chosen_data["text"].lower():
         memes_dir = os.path.join(app.static_folder, "memes")
@@ -81,17 +82,16 @@ def random_excuse():
 
 @app.route("/excuses-stats", methods=["GET"])
 def excuses_stats():
-    """📊 Отримати статистику: кількість і топ-5 відмазок"""
+    """📊 Отримати статистику: кількість та топ-5 відмазок
+    """
     try:
-        excuses_ref = db.collection("excuses").get()
-        excuses = [doc.to_dict() for doc in excuses_ref]
-
-        total_excuses = len(excuses)
-        top_excuses = sorted(excuses, key=lambda x: x.get('rating', 0), reverse=True)[:5]
+        excuses_ref = db.collection("excuses").order_by("rating", direction=firestore.Query.DESCENDING).limit(5).get()
+        top_excuses = [doc.to_dict() for doc in excuses_ref]
+        total_excuses = db.collection("excuses").get()
 
         return jsonify({
-            "total": total_excuses,
-            "top": [excuse['text'] for excuse in top_excuses]
+            "total": len(total_excuses),
+            "top": top_excuses
         })
     except Exception as e:
         print("⚠️ Помилка завантаження статистики:", e)
@@ -99,7 +99,8 @@ def excuses_stats():
 
 @app.route("/logs", methods=["GET"])
 def show_logs():
-    """📝 Перегляд локального файлу логів"""
+    """📝 Перегляд локального файлу логів
+    """
     try:
         with open("excuse-log.txt", "r", encoding="utf-8") as f:
             return f"<pre>{f.read()}</pre>"
