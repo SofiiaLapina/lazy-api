@@ -32,7 +32,7 @@ def home():
 
 @app.route("/random-excuse", methods=["GET"])
 def random_excuse():
-    # 📥 Отримання всіх відмазок
+    """🎲 Отримати рандомну відмазку та оновити її рейтинг"""
     excuses_ref = db.collection("excuses").get()
     excuses = [doc for doc in excuses_ref]
     if not excuses:
@@ -41,7 +41,7 @@ def random_excuse():
     chosen_doc = random.choice(excuses)
     chosen_data = chosen_doc.to_dict()
 
-    # 📈 Збільшення рейтингу вибраної відмазки на +1
+    # 📈 Збільшити рейтинг вибраної відмазки
     try:
         chosen_doc.reference.update({
             "rating": firestore.Increment(1)
@@ -49,12 +49,13 @@ def random_excuse():
     except Exception as e:
         print("⚠️ Помилка оновлення рейтингу:", e)
 
-    # 📝 Логи
+    # 📝 Логи запиту
     client_ip = request.remote_addr or "unknown"
     log_entry = f"{datetime.now()} | {client_ip} | {chosen_data['text']}\n"
     with open("excuse-log.txt", "a", encoding="utf-8") as f:
         f.write(log_entry)
 
+    # 🔗 Відправка логів на EC2
     try:
         requests.post("http://54.163.84.41:5000/log", json={
             "ip": client_ip,
@@ -63,7 +64,7 @@ def random_excuse():
     except Exception as e:
         print("⚠️ EC2 лог помилка:", e)
 
-    # 🎞️ Гіфка тільки якщо не "боже яке кончене"
+    # 🎞️ Підбір гіфки, якщо текст не містить "боже"
     meme_url = ""
     if "боже" not in chosen_data["text"].lower():
         memes_dir = os.path.join(app.static_folder, "memes")
@@ -78,8 +79,27 @@ def random_excuse():
         "meme_url": meme_url
     })
 
+@app.route("/excuses-stats", methods=["GET"])
+def excuses_stats():
+    """📊 Отримати статистику: кількість і топ-5 відмазок"""
+    try:
+        excuses_ref = db.collection("excuses").get()
+        excuses = [doc.to_dict() for doc in excuses_ref]
+
+        total_excuses = len(excuses)
+        top_excuses = sorted(excuses, key=lambda x: x.get('rating', 0), reverse=True)[:5]
+
+        return jsonify({
+            "total": total_excuses,
+            "top": [excuse['text'] for excuse in top_excuses]
+        })
+    except Exception as e:
+        print("⚠️ Помилка завантаження статистики:", e)
+        return jsonify({"error": "Помилка сервера"}), 500
+
 @app.route("/logs", methods=["GET"])
 def show_logs():
+    """📝 Перегляд локального файлу логів"""
     try:
         with open("excuse-log.txt", "r", encoding="utf-8") as f:
             return f"<pre>{f.read()}</pre>"

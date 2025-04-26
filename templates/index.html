@@ -44,25 +44,6 @@
       animation: fade-in 0.5s ease-in-out;
     }
 
-    .meme, #granny-video {
-      display: block;
-      margin: 2rem auto;
-      max-width: 80%;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-
-    .emoji {
-      font-size: 4rem;
-      animation: wiggle 1.2s infinite;
-    }
-
-    .footer {
-      margin-top: 3rem;
-      font-size: 1rem;
-      color: #999;
-    }
-
     #info-panel {
       margin-top: 2rem;
       font-size: 1.2rem;
@@ -75,20 +56,18 @@
       list-style: none;
     }
 
-    @keyframes wiggle {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(3deg); }
-      75% { transform: rotate(-3deg); }
+    .meme, #granny-video {
+      display: block;
+      margin: 2rem auto;
+      max-width: 80%;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
-    @keyframes fade-in {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes pop-in {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+    .footer {
+      margin-top: 3rem;
+      font-size: 1rem;
+      color: #999;
     }
 
     #granny {
@@ -129,6 +108,22 @@
       animation: shake 0.3s ease-in-out;
     }
 
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(3deg); }
+      75% { transform: rotate(-3deg); }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pop-in {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
     @keyframes shake {
       0% { transform: translateX(-50%) translateY(0); }
       25% { transform: translateX(-50%) translateY(-5px); }
@@ -150,7 +145,7 @@
   </div>
 
   <img id="meme" class="meme" style="display:none;" />
-  <video id="granny-video" class="meme" style="display:none;" autoplay playsinline controls></video>
+  <video id="granny-video" class="meme" style="display:none;" autoplay playsinline controls muted></video>
 
   <div class="footer">
     🐌 Зроблено з любов’ю і неймовірною лінню.
@@ -182,6 +177,7 @@
     const granny = document.getElementById("granny");
     const popSound = document.getElementById("pop-sound");
     const excusesCountEl = document.getElementById("excuses-count");
+    const topListEl = document.getElementById("top-excuses");
 
     async function getExcuse() {
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -200,30 +196,27 @@
           memeImg.style.display = "block";
         }
 
-        // Оновлюємо топ-5 після кожної відмазки
-        loadTopExcuses();
+        // Після кліку оновити статистику
+        loadStats();
       } catch (err) {
         excuseEl.innerHTML = "❌ Не вдалося завантажити відмазку.";
       }
     }
 
-    async function loadTopExcuses() {
+    async function loadStats() {
       try {
-        const resTop = await fetch("/top-excuses");
-        const topExcuses = await resTop.json();
-        const topList = document.getElementById("top-excuses");
-        topList.innerHTML = "";
-        topExcuses.forEach((excuse, index) => {
-          const li = document.createElement("li");
-          li.innerText = `${index + 1}. ${excuse.text} (обрали ${excuse.rating} разів)`;
-          topList.appendChild(li);
-        });
+        const res = await fetch("/excuses-stats");
+        const data = await res.json();
 
-        const resCount = await fetch("/excuses-count");
-        const countData = await resCount.json();
-        excusesCountEl.innerText = countData.count;
+        excusesCountEl.innerText = data.total;
+        topListEl.innerHTML = "";
+        data.top.forEach((excuse, index) => {
+          const li = document.createElement("li");
+          li.textContent = `${index + 1}. ${excuse.text} (${excuse.rating} разів)`;
+          topListEl.appendChild(li);
+        });
       } catch (err) {
-        console.error("Помилка завантаження топ-5:", err);
+        console.error("Помилка завантаження статистики:", err);
       }
     }
 
@@ -238,7 +231,6 @@
         memeImg.style.display = "none";
         grannyVideo.muted = false;
         grannyVideo.play();
-
         grannyVideo.onended = () => {
           tip.classList.remove("show");
           grannyVideo.style.display = "none";
@@ -258,7 +250,7 @@
       }
     });
 
-    loadTopExcuses();
+    loadStats();
   </script>
 </body>
 </html>
