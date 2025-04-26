@@ -63,6 +63,18 @@
       color: #999;
     }
 
+    #info-panel {
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    ul#top-excuses {
+      margin-top: 1rem;
+      padding: 0;
+      list-style: none;
+    }
+
     @keyframes wiggle {
       0%, 100% { transform: rotate(0deg); }
       25% { transform: rotate(3deg); }
@@ -131,6 +143,12 @@
   <button onclick="getExcuse()">🎲 Дай мені відмазку</button>
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
 
+  <div id="info-panel">
+    📋 Всього відмазок у базі: <span id="excuses-count">завантаження...</span><br/>
+    🔥 Топ-5 найпопулярніших:
+    <ul id="top-excuses"></ul>
+  </div>
+
   <img id="meme" class="meme" style="display:none;" />
   <video id="granny-video" class="meme" style="display:none;" autoplay playsinline controls></video>
 
@@ -163,6 +181,7 @@
     const tip = document.getElementById("granny-tip");
     const granny = document.getElementById("granny");
     const popSound = document.getElementById("pop-sound");
+    const excusesCountEl = document.getElementById("excuses-count");
 
     async function getExcuse() {
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -180,8 +199,31 @@
           memeImg.src = data.meme_url;
           memeImg.style.display = "block";
         }
+
+        // Оновлюємо топ-5 після кожної відмазки
+        loadTopExcuses();
       } catch (err) {
         excuseEl.innerHTML = "❌ Не вдалося завантажити відмазку.";
+      }
+    }
+
+    async function loadTopExcuses() {
+      try {
+        const resTop = await fetch("/top-excuses");
+        const topExcuses = await resTop.json();
+        const topList = document.getElementById("top-excuses");
+        topList.innerHTML = "";
+        topExcuses.forEach((excuse, index) => {
+          const li = document.createElement("li");
+          li.innerText = `${index + 1}. ${excuse.text} (обрали ${excuse.rating} разів)`;
+          topList.appendChild(li);
+        });
+
+        const resCount = await fetch("/excuses-count");
+        const countData = await resCount.json();
+        excusesCountEl.innerText = countData.count;
+      } catch (err) {
+        console.error("Помилка завантаження топ-5:", err);
       }
     }
 
@@ -215,6 +257,8 @@
         }, 15000);
       }
     });
+
+    loadTopExcuses();
   </script>
 </body>
 </html>
