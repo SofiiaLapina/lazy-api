@@ -9,12 +9,13 @@
       font-family: 'Comic Sans MS', cursive, sans-serif;
       text-align: center;
       padding: 3rem;
+      margin: 0;
     }
 
     h1 {
       font-size: 3rem;
       color: #d35400;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
       animation: pop-in 1s ease-out;
     }
 
@@ -37,7 +38,7 @@
     }
 
     .excuse {
-      margin-top: 3rem;
+      margin-top: 2.5rem;
       font-size: 2rem;
       color: #2f3542;
       min-height: 100px;
@@ -45,31 +46,34 @@
     }
 
     #info-panel {
-      margin-top: 2rem;
+      margin-top: 3rem;
+      padding: 1.5rem;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: inline-block;
+      text-align: left;
       font-size: 1.2rem;
       color: #555;
     }
 
     ul#top-excuses {
       margin-top: 1rem;
-      padding: 0;
-      list-style: none;
+      padding-left: 1.2rem;
     }
 
-    .meme, #granny-video {
-      display: block;
-      margin: 2rem auto;
-      max-width: 80%;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    ul#top-excuses li {
+      margin: 0.4rem 0;
+      font-size: 1rem;
     }
 
     .footer {
-      margin-top: 3rem;
+      margin-top: 4rem;
       font-size: 1rem;
       color: #999;
     }
 
+    /* Анімації та стилі бабусі */
     #granny {
       position: fixed;
       bottom: 20px;
@@ -108,15 +112,12 @@
       animation: shake 0.3s ease-in-out;
     }
 
-    @keyframes wiggle {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(3deg); }
-      75% { transform: rotate(-3deg); }
-    }
-
-    @keyframes fade-in {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes shake {
+      0% { transform: translateX(-50%) translateY(0); }
+      25% { transform: translateX(-50%) translateY(-5px); }
+      50% { transform: translateX(-50%) translateY(5px); }
+      75% { transform: translateX(-50%) translateY(-5px); }
+      100% { transform: translateX(-50%) translateY(0); }
     }
 
     @keyframes pop-in {
@@ -124,12 +125,9 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-    @keyframes shake {
-      0% { transform: translateX(-50%) translateY(0); }
-      25% { transform: translateX(-50%) translateY(-5px); }
-      50% { transform: translateX(-50%) translateY(5px); }
-      75% { transform: translateX(-50%) translateY(-5px); }
-      100% { transform: translateX(-50%) translateY(0); }
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -139,16 +137,13 @@
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
 
   <div id="info-panel">
-    📋 Всього відмазок у базі: <span id="excuses-count">завантаження...</span><br/>
-    🔥 Топ-5 найпопулярніших:
+    <div>📋 Всього відмазок: <span id="excuses-count">...</span></div>
+    <div style="margin-top: 0.8rem;">🔥 Топ-5 найпопулярніших:</div>
     <ul id="top-excuses"></ul>
   </div>
 
-  <img id="meme" class="meme" style="display:none;" />
-  <video id="granny-video" class="meme" style="display:none;" autoplay playsinline controls muted></video>
-
   <div class="footer">
-    🐌 Зроблено з любов’ю і неймовірною лінню.
+    🐌 Зроблено з любов'ю і неймовірною лінню.
   </div>
 
   <div id="granny" title="👵 Натисни для суворої поради">👵</div>
@@ -157,49 +152,19 @@
   <audio id="pop-sound" src="https://www.myinstants.com/media/sounds/pop-cat-original-meme.mp3" preload="auto"></audio>
 
   <script>
-    const emojis = ['😴', '🤡', '😵', '😌', '🙃', '😎', '😅', '🫠', '🧠', '💤'];
-    const grannyTips = [
-      "👵 При Сталіні так не лінувалися.",
-      "👵 В мої роки вже по два діти було, а не кнопки тискали.",
-      "👵 Сидиш тут... А картоплю хто копати буде?",
-      "👵 Ще одна відмазка — і я кличу діда.",
-      "👵 Хоч щось за день зроби — щоб не соромно було в труні лежати.",
-      "👵 Навіть мій кактус більше рухається, ніж ти.",
-      "👵 Ото виросло покоління кнопкодавів.",
-      "👵 Боже… яке кончене.",
-      "👵 От сидиш ти тут, а Господь дивиться і плаче."
-    ];
-
     const excuseEl = document.getElementById("excuse");
-    const memeImg = document.getElementById("meme");
-    const grannyVideo = document.getElementById("granny-video");
-    const tip = document.getElementById("granny-tip");
-    const granny = document.getElementById("granny");
-    const popSound = document.getElementById("pop-sound");
     const excusesCountEl = document.getElementById("excuses-count");
     const topListEl = document.getElementById("top-excuses");
 
     async function getExcuse() {
-      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-      excuseEl.innerHTML = `<span class='emoji'>${randomEmoji}</span> Завантажуємо...`;
-      memeImg.style.display = "none";
-      grannyVideo.style.display = "none";
-
+      excuseEl.innerHTML = "<span class='emoji'>😴</span> Завантаження...";
       try {
         const res = await fetch("/random-excuse");
         const data = await res.json();
-        popSound.play();
-        excuseEl.innerHTML = "🗯️ " + data.text;
-
-        if (data.meme_url) {
-          memeImg.src = data.meme_url;
-          memeImg.style.display = "block";
-        }
-
-        // Після кліку оновити статистику
+        excuseEl.innerHTML = "🗲️ " + data.text;
         loadStats();
       } catch (err) {
-        excuseEl.innerHTML = "❌ Не вдалося завантажити відмазку.";
+        excuseEl.innerHTML = "❌ Не вдалося завантажити.";
       }
     }
 
@@ -207,12 +172,11 @@
       try {
         const res = await fetch("/excuses-stats");
         const data = await res.json();
-
         excusesCountEl.innerText = data.total;
         topListEl.innerHTML = "";
-        data.top.forEach((excuse, index) => {
+        data.top.forEach((item, index) => {
           const li = document.createElement("li");
-          li.textContent = `${index + 1}. ${excuse.text} (${excuse.rating} разів)`;
+          li.innerText = `${index + 1}. ${item.text} (${item.rating} разів)`;
           topListEl.appendChild(li);
         });
       } catch (err) {
@@ -220,34 +184,9 @@
       }
     }
 
-    granny.addEventListener("click", () => {
-      const random = grannyTips[Math.floor(Math.random() * grannyTips.length)];
-      tip.innerText = random;
-      tip.classList.add("show");
-
-      if (random === "👵 Боже… яке кончене.") {
-        grannyVideo.src = "/static/granny/bozhe.mp4";
-        grannyVideo.style.display = "block";
-        memeImg.style.display = "none";
-        grannyVideo.muted = false;
-        grannyVideo.play();
-        grannyVideo.onended = () => {
-          tip.classList.remove("show");
-          grannyVideo.style.display = "none";
-        };
-      } else {
-        const gifs = Array.from({ length: 9 }, (_, i) => `/static/granny/${i + 1}.gif`);
-        const gif = gifs[Math.floor(Math.random() * gifs.length)];
-        memeImg.src = gif;
-        memeImg.style.display = "block";
-        grannyVideo.pause();
-        grannyVideo.style.display = "none";
-
-        setTimeout(() => {
-          tip.classList.remove("show");
-          memeImg.style.display = "none";
-        }, 15000);
-      }
+    document.getElementById("granny").addEventListener("click", () => {
+      const grannyTip = document.getElementById("granny-tip");
+      grannyTip.classList.toggle("show");
     });
 
     loadStats();
