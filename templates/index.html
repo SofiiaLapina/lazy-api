@@ -73,7 +73,14 @@
       color: #999;
     }
 
-    /* Анімації та стилі бабусі */
+    .meme, #granny-video {
+      display: block;
+      margin: 2rem auto;
+      max-width: 80%;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
     #granny {
       position: fixed;
       bottom: 20px;
@@ -134,7 +141,11 @@
 <body>
   <h1>🛋️ Чому я нічого не зробив(-ла)?</h1>
   <button onclick="getExcuse()">🎲 Дай мені відмазку</button>
+
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
+
+  <img id="meme" class="meme" style="display:none;" />
+  <video id="granny-video" class="meme" style="display:none;" autoplay playsinline controls muted></video>
 
   <div id="info-panel">
     <div>📋 Всього відмазок: <span id="excuses-count">...</span></div>
@@ -143,7 +154,7 @@
   </div>
 
   <div class="footer">
-    🐌 Зроблено з любов'ю і неймовірною лінню.
+    🐌 Зроблено з любов’ю і неймовірною лінню.
   </div>
 
   <div id="granny" title="👵 Натисни для суворої поради">👵</div>
@@ -152,16 +163,31 @@
   <audio id="pop-sound" src="https://www.myinstants.com/media/sounds/pop-cat-original-meme.mp3" preload="auto"></audio>
 
   <script>
+    const emojis = ['😴', '🤡', '😵', '😌', '🙃', '😎', '😅', '🫠', '🧠', '💤'];
     const excuseEl = document.getElementById("excuse");
+    const memeImg = document.getElementById("meme");
+    const grannyVideo = document.getElementById("granny-video");
     const excusesCountEl = document.getElementById("excuses-count");
     const topListEl = document.getElementById("top-excuses");
+    const popSound = document.getElementById("pop-sound");
 
     async function getExcuse() {
-      excuseEl.innerHTML = "<span class='emoji'>😴</span> Завантаження...";
+      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+      excuseEl.innerHTML = `<span class='emoji'>${randomEmoji}</span> Завантажуємо...`;
+      memeImg.style.display = "none";
+      grannyVideo.style.display = "none";
+
       try {
         const res = await fetch("/random-excuse");
         const data = await res.json();
-        excuseEl.innerHTML = "🗲️ " + data.text;
+        popSound.play();
+        excuseEl.innerHTML = "🗯️ " + data.text;
+
+        if (data.meme_url) {
+          memeImg.src = data.meme_url;
+          memeImg.style.display = "block";
+        }
+
         loadStats();
       } catch (err) {
         excuseEl.innerHTML = "❌ Не вдалося завантажити.";
@@ -185,8 +211,8 @@
     }
 
     document.getElementById("granny").addEventListener("click", () => {
-      const grannyTip = document.getElementById("granny-tip");
-      grannyTip.classList.toggle("show");
+      const tip = document.getElementById("granny-tip");
+      tip.classList.toggle("show");
     });
 
     loadStats();
