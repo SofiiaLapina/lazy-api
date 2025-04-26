@@ -140,7 +140,7 @@
 </head>
 <body>
   <h1>🛋️ Чому я нічого не зробив(-ла)?</h1>
-  <button onclick="getExcuse()">🎲 Дай мені відмазку</button>
+  <button onclick="getExcuse()">🌹 Дай мені відмазку</button>
 
   <div class="excuse" id="excuse"><span class="emoji">😴</span></div>
 
@@ -154,7 +154,7 @@
   </div>
 
   <div class="footer">
-    🐌 Зроблено з любов’ю і неймовірною лінню.
+    🐌 Зроблено з любов'ю і неймовірною лінню.
   </div>
 
   <div id="granny" title="👵 Натисни для суворої поради">👵</div>
@@ -163,17 +163,31 @@
   <audio id="pop-sound" src="https://www.myinstants.com/media/sounds/pop-cat-original-meme.mp3" preload="auto"></audio>
 
   <script>
-    const emojis = ['😴', '🤡', '😵', '😌', '🙃', '😎', '😅', '🫠', '🧠', '💤'];
+    const emojis = ['😴', '🧕', '😭', '😌', '🙃', '😎', '😅', '🫠', '🧬', '💤'];
+    const grannyTips = [
+      "👵 При Сталіні так не лінувалися.",
+      "👵 В мої роки вже по два діти було.",
+      "👵 Сидиш тут... А картоплю хто копати буде?",
+      "👵 Ще одна відмазка і я кличу діда.",
+      "👵 Хоч щось за день зроби.",
+      "👵 Кактус більше рухається, ніж ти.",
+      "👵 Ото виросло покоління кнопкодавів.",
+      "👵 Боже... яке кончене.",
+      "👵 Бог дивиться і плаче."
+    ];
+
     const excuseEl = document.getElementById("excuse");
     const memeImg = document.getElementById("meme");
     const grannyVideo = document.getElementById("granny-video");
     const excusesCountEl = document.getElementById("excuses-count");
     const topListEl = document.getElementById("top-excuses");
     const popSound = document.getElementById("pop-sound");
+    const granny = document.getElementById("granny");
+    const tip = document.getElementById("granny-tip");
 
     async function getExcuse() {
       const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-      excuseEl.innerHTML = `<span class='emoji'>${randomEmoji}</span> Завантажуємо...`;
+      excuseEl.innerHTML = `<span class='emoji'>${randomEmoji}</span> Завантаження...`;
       memeImg.style.display = "none";
       grannyVideo.style.display = "none";
 
@@ -181,7 +195,7 @@
         const res = await fetch("/random-excuse");
         const data = await res.json();
         popSound.play();
-        excuseEl.innerHTML = "🗯️ " + data.text;
+        excuseEl.innerHTML = "🍋 " + data.text;
 
         if (data.meme_url) {
           memeImg.src = data.meme_url;
@@ -210,9 +224,34 @@
       }
     }
 
-    document.getElementById("granny").addEventListener("click", () => {
-      const tip = document.getElementById("granny-tip");
-      tip.classList.toggle("show");
+    granny.addEventListener("click", () => {
+      const randomTip = grannyTips[Math.floor(Math.random() * grannyTips.length)];
+      tip.innerText = randomTip;
+      tip.classList.add("show");
+
+      if (randomTip.includes("Боже")) {
+        grannyVideo.src = "/static/granny/bozhe.mp4";
+        grannyVideo.style.display = "block";
+        memeImg.style.display = "none";
+        grannyVideo.play();
+
+        grannyVideo.onended = () => {
+          tip.classList.remove("show");
+          grannyVideo.style.display = "none";
+        };
+      } else {
+        const gifs = Array.from({ length: 9 }, (_, i) => `/static/granny/${i + 1}.gif`);
+        const gif = gifs[Math.floor(Math.random() * gifs.length)];
+        memeImg.src = gif;
+        memeImg.style.display = "block";
+        grannyVideo.pause();
+        grannyVideo.style.display = "none";
+
+        setTimeout(() => {
+          tip.classList.remove("show");
+          memeImg.style.display = "none";
+        }, 15000);
+      }
     });
 
     loadStats();
