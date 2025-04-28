@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 import requests
 
-# 🔥 Ініціалізація Firebase
+# Ініціалізація Firebase
 if os.environ.get("RAILWAY_ENVIRONMENT"):
     print("🌩️ Режим: Railway (production)")
     firebase_key = os.environ.get("FIREBASE_KEY_JSON")
@@ -23,7 +23,7 @@ else:
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# 🚀 Flask
+# Flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 @app.route("/")
@@ -42,7 +42,7 @@ def random_excuse():
     chosen_doc = random.choice(excuses)
     chosen_data = chosen_doc.to_dict()
 
-    # 📈 Збільшити рейтинг обраної відмазки
+    # Збільшити рейтинг обраної відмазки
     try:
         chosen_doc.reference.update({
             "rating": firestore.Increment(1)
@@ -50,13 +50,13 @@ def random_excuse():
     except Exception as e:
         print("⚠️ Помилка оновлення рейтингу:", e)
 
-    # 📝 Логи запиту
+    # Логи запиту
     client_ip = request.remote_addr or "unknown"
     log_entry = f"{datetime.now()} | {client_ip} | {chosen_data['text']}\n"
     with open("excuse-log.txt", "a", encoding="utf-8") as f:
         f.write(log_entry)
 
-    # 🔗 Відправка логів на EC2
+    # Відправка логів на EC2
     try:
         requests.post("http://54.163.84.41:5000/log", json={
             "ip": client_ip,
@@ -65,7 +65,7 @@ def random_excuse():
     except Exception as e:
         print("⚠️ EC2 лог помилка:", e)
 
-    # 🎮 Підбір гіфки, якщо текст не містить "боже"
+    # Підбір гіфки, якщо текст не містить "боже"
     meme_url = ""
     if "боже" not in chosen_data["text"].lower():
         memes_dir = os.path.join(app.static_folder, "memes")
@@ -107,7 +107,7 @@ def show_logs():
     except FileNotFoundError:
         return "Файл логів не знайдено."
 
-# 🏁 Запуск локально
+# Запуск локально
 if __name__ == "__main__":
     print("🚀 API запускається локально...")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
